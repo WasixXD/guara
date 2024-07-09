@@ -4,4 +4,3 @@
 
 ./main.o 
 
-rm ./main.o
