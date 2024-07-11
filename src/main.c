@@ -1,5 +1,6 @@
 #include <malloc.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "devices.h"
 #include "raylib.h"
@@ -23,21 +24,27 @@ int main(void) {
 	bool simular = false;
 
 	while (!WindowShouldClose()) {
-		if (IsKeyPressed(KEY_ESCAPE)) break;
+		if (IsKeyPressed(KEY_ESCAPE))
+			break;
 		BeginDrawing();
 		ClearBackground((Color){0x18, 0x18, 0x18, 0});
 
 		// UI
 		draw_tables(&items, &console);
 		draw_buttons(&items, &console);
-		EVENTS ev = check_events();
+		EVENTS ev = check_events(&world);
 		handle_events(ev, &world);
 
-		draw_devices(&world);
 		draw_cables(&world);
+		draw_devices(&world);
 
-		if (simular) {
-			simulate(&world);
+		if (world.cabos_size > 0) {
+
+			world.all[0].end.ip[0] = 192;
+			world.all[0].end.ip[1] = 168;
+			world.all[0].end.ip[2] = 10;
+			world.all[0].end.ip[3] = 2;
+			prepare_arp_packet(&world.cabos[0], ARP_REQ);
 		}
 		EndDrawing();
 	}

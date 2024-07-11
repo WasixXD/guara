@@ -24,7 +24,7 @@ void draw_devices(struct World *world);
 
 void handle_events(EVENTS ev, struct World *world);
 
-EVENTS check_events();
+EVENTS check_events(struct World *world);
 
 void draw_cables(struct World *world);
 
