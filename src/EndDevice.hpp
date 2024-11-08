@@ -2,6 +2,7 @@
 #define ENDDEVICE_HPP
 
 #include "Device.hpp"
+#include <stdio.h>
 #include <vector>
 #include <random>
 
@@ -28,6 +29,10 @@ class EndDevice : public Device {
             this->IP_ADDRESS = dist(gen);
         }
 
+        uint32_t getIP() {
+            return this->IP_ADDRESS;
+        }
+
 
         void draw() override {
             DrawCircleV(Vector2{this->x, this->y}, this->radius, this->color);
@@ -36,6 +41,10 @@ class EndDevice : public Device {
 
         bool checkMouseCollision(Vector2 mousePos) override {
             return CheckCollisionPointCircle(mousePos, Vector2{this->x, this->y},this->radius);
+        }
+        
+        void ping(uint32_t target_ip) {
+            printf("MY IP: %u WANTS TO PING %u\n", this->IP_ADDRESS, target_ip);
         }
 };
 

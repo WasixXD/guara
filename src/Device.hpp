@@ -3,7 +3,8 @@
 
 #include <inttypes.h>
 #include <vector>
-#include "Cable.hpp"
+
+class Cable;
 
 extern "C" {
     #include <raylib.h>
@@ -27,7 +28,6 @@ class Device {
             return checkMouseCollision(mousePos);
         }
 
-        virtual void ping(EndDevice *e) {}
 };
 
 

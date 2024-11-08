@@ -22,11 +22,15 @@ class Game {
         std::vector<Cable*> cables;
 
         bool cable_clicked = false;
-        Cable *c;
+        Cable *c = nullptr;
 
-    void destroy() {
-        this->running = false;
-    }
+
+        uint32_t target_ip;
+        EndDevice *sender = nullptr;
+
+        void destroy() {
+            this->running = false;
+        }
 
     public: 
         Game(int w, int h, const char *t): width(w), height(h), text(t) {
@@ -79,8 +83,8 @@ class Game {
                         for(Device *d : this->devices) {
                             if(d->checkMouseCollision(GetMousePosition())) {
                                 this->cable_clicked = true;
-                                c->setLeft(d);
                                 d->cables.push_back(c);
+                                c->setLeft(d);
                                 return;
                             }
                         }
@@ -98,6 +102,29 @@ class Game {
                     break;
 
                 case KEY_V: 
+
+                    if(sender == nullptr) {
+                        for(Device *d : this->devices) {
+                            if(d->checkMouseCollision(GetMousePosition())) {
+                                EndDevice *c = dynamic_cast<EndDevice*>(d);
+                                if(c == nullptr) return;
+                                
+                                this->sender = c;
+                                return;
+                            }
+                        }
+                    }
+                    for(Device *d : this->devices) {
+                        if(d->checkMouseCollision(GetMousePosition())) {
+                            EndDevice *c = dynamic_cast<EndDevice*>(d);
+                            if(c == nullptr) return;
+
+                            target_ip = c->getIP();
+                        }
+                    }
+
+                    this->sender->ping(this->target_ip);
+                    this->sender = nullptr;
 
                     break;
                 default:
