@@ -1,14 +1,16 @@
-CC = gcc
-CFLAGS = -Wextra -Wall -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -g
+CC = g++
+CFLAGS =  -Wall -Wextra -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
-all: run exec clean
 
-run:
-	$(CC) -o main.o src/*.c $(CFLAGS) 
+.PHONY: all build run clean
 
-exec: run
-	./script.sh
+all: build run clean
 
-clean: exec
-	rm ./main.o
+build: 
+	clear
+	$(CC)  -o guara src/* $(CFLAGS) 
 
+run: build
+	./guara
+
+clean: run 
