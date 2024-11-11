@@ -2,6 +2,7 @@
 #define CABLE_HPP
 
 #include <memory>
+#include "Packets.hpp"
 
 extern "C" {
     #include <raylib.h>
@@ -20,6 +21,9 @@ class Cable {
         void setLeft(Device *n);
 
         void draw(); 
+
+        void sendArpLeft(Arp a);
+        void sendArpRight(Arp a);
 };
 
 

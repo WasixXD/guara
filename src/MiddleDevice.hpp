@@ -2,6 +2,8 @@
 #define MIDDLEDEVICE_HPP
 
 #include "Device.hpp"
+#include "Packets.hpp"
+#include "Cable.hpp"
 
 class MiddleDevice : public Device
 {
@@ -21,6 +23,16 @@ public:
     }
     bool checkMouseCollision(Vector2 mousePos) override {
         return CheckCollisionPointRec(mousePos, Rectangle{ this->x, this->y, this->width, this->height });
+    }
+
+    void receiveArp(Arp a) override {
+
+        printf("[%u] ARP HIT THE SWITCH\n", this->MAC_ADDRESS);
+        for(Cable *c : this->cables) {
+            // dont send the package to ourselfs neither the sender
+            if(c->left->MAC_ADDRESS != this->MAC_ADDRESS && c->left->MAC_ADDRESS != a.sender_mac) c->sendArpLeft(a);
+            if(c->right->MAC_ADDRESS != this->MAC_ADDRESS && c->right->MAC_ADDRESS != a.sender_mac) c->sendArpRight(a);
+        }
     }
 };
 

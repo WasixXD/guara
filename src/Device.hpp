@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include <vector>
+#include "Packets.hpp"
 
 class Cable;
 
@@ -17,6 +18,7 @@ class Device {
         const char *name;
         float x;
         float y; 
+        // MAC SHOULD BE 64 bits and then we just use the first 48?
         uint32_t MAC_ADDRESS;
         Color color;
         std::vector<Cable*> cables;
@@ -27,6 +29,8 @@ class Device {
         virtual bool checkMouseCollision(Vector2 mousePos) {
             return checkMouseCollision(mousePos);
         }
+
+        virtual void receiveArp(Arp a) {};
 
 };
 

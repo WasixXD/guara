@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS =  -Wall -Wextra -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+CFLAGS =  -Wall -Wextra -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -std=c++20
 
 
 .PHONY: all build run clean

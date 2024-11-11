@@ -48,8 +48,14 @@ class Game {
 
 
         void addEndDevice() {
+            // remove this?
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            
+            std::uniform_int_distribution<uint32_t> dist(0, UINT32_MAX);
+
             Vector2 mousePos = GetMousePosition();
-            EndDevice *tmp = new EndDevice("PC", mousePos.x, mousePos.y, 0xCAFE, RED);
+            EndDevice *tmp = new EndDevice("PC", mousePos.x, mousePos.y, dist(gen), RED);
             tmp->setRandomIp();
             this->devices.push_back(tmp);
         }
