@@ -21,7 +21,7 @@ class EthernetFrame {
         }
 };
 
-class Arp : EthernetFrame {
+class Arp : public EthernetFrame {
     public:
         uint32_t sender_mac;
         uint32_t sender_ip;

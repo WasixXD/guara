@@ -19,10 +19,11 @@ class Game {
         bool running = false;
 
         std::vector<Device*> devices;
-        std::vector<Cable*> cables;
 
         bool cable_clicked = false;
         Cable *c = nullptr;
+
+        Device *mock = nullptr;
 
 
         uint32_t target_ip;
@@ -89,8 +90,7 @@ class Game {
                         for(Device *d : this->devices) {
                             if(d->checkMouseCollision(GetMousePosition())) {
                                 this->cable_clicked = true;
-                                d->cables.push_back(c);
-                                c->setLeft(d);
+                                this->mock = d;
                                 return;
                             }
                         }
@@ -98,12 +98,17 @@ class Game {
                     // get second device
                     for(Device *d : this->devices) {
                         if(d->checkMouseCollision(GetMousePosition())) {
-                            c->setRight(d);
+                            // set the connection of the 2nd to the 1st
+                            c->setConn(this->mock);
                             d->cables.push_back(c);
+
+                            // set the connection of the 1st to the 2nd
+                            Cable *tmp = new Cable(); 
+                            tmp->setConn(d);
+                            this->mock->cables.push_back(tmp);
+
                         }
                     }
-
-                    this->cables.push_back(c);
                     this->cable_clicked = false;
                     break;
 
@@ -125,7 +130,7 @@ class Game {
                             EndDevice *c = dynamic_cast<EndDevice*>(d);
                             if(c == nullptr) return;
 
-                            target_ip = c->getIP();
+                            this->target_ip = c->getIP();
                         }
                     }
 
@@ -142,14 +147,14 @@ class Game {
         void drawDevices() {
             for(Device *d : this->devices) {
                 d->draw();
+
+                for(Cable *c : d->cables) {
+                    c->draw(Vector2{ d->x, d->y });
+                }
             }
         }
 
-        void drawCables() {
-            for(Cable *c : this->cables) {
-                c->draw();
-            }
-        }
+       
 
 
         void mainLoop() {
@@ -158,7 +163,6 @@ class Game {
                     ClearBackground(RAYWHITE);
                     this->handleButtonPressed();
                     this->drawDevices();
-                    this->drawCables();
                 EndDrawing();
             }
         }

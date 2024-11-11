@@ -58,12 +58,27 @@ class EndDevice : public Device {
             this->arp_table.insert(std::make_pair(target_ip, target_mac));
         }
 
+        // :(
+        int findCableMac(uint32_t mac) {
+            for(int i = 0; i < this->cables.size(); i++) {
+                if(this->cables[i]->conn->MAC_ADDRESS == mac) return i;
+            }
+            return -1;
+        }
+
         void receiveArp(Arp a) override {
             printf("[%u] WHO HAS THE MAC OF %u? SAYS %u\n", this->MAC_ADDRESS, a.target_ip, a.sender_mac);
 
             // check if the package is to ourselfs
-            if(a.target_ip == this->IP_ADDRESS && a.target_mac != 0xffff && a.request) {
-                Arp a(this->MAC_ADDRESS, this->IP_ADDRESS, ) 
+            if(a.target_ip == this->IP_ADDRESS && a.request) {
+                Arp response(this->MAC_ADDRESS, this->IP_ADDRESS, this->MAC_ADDRESS, a.sender_ip);
+                int position = findCableMac(a.SRC_MAC);
+
+                response.request = false;
+                response.set_dst_mac(a.sender_mac);
+                response.set_src_mac(this->MAC_ADDRESS); 
+                this->cables[position]->sendArp(response);
+
             }
 
         }
@@ -76,8 +91,7 @@ class EndDevice : public Device {
 
                 // send arp to all conected cables
                 for(Cable *c : this->cables) {
-                    if(c->left->MAC_ADDRESS != this->MAC_ADDRESS) c->sendArpLeft(a);
-                    if(c->right->MAC_ADDRESS != this->MAC_ADDRESS) c->sendArpRight(a);
+                    c->sendArp(a);
                 }
             }
 

@@ -13,17 +13,14 @@ class Device;
 
 class Cable {
     public:
-        Device* left;
-        Device* right;
+        Device* conn;
 
-        void setRight(Device *n); 
 
-        void setLeft(Device *n);
+        void setConn(Device *n);
 
-        void draw(); 
+        void draw(Vector2 to); 
 
-        void sendArpLeft(Arp a);
-        void sendArpRight(Arp a);
+        void sendArp(Arp a);
 };
 
 
