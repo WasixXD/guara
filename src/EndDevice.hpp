@@ -4,7 +4,10 @@
 #include "Device.hpp"
 #include "Packets.hpp"
 #include "Cable.hpp"
+#include "utils.hpp"
+
 #include <stdio.h>
+#include <iostream>
 #include <vector>
 #include <random>
 #include <unordered_map>
@@ -20,7 +23,6 @@ class EndDevice : public Device {
     public: 
         EndDevice(const char *n, float x, float y, uint32_t m, Color c) : Device(n, x, y, m, c) { 
             this->radius = 20;
-            printf("[%u] %s IP: %u \n", this->MAC_ADDRESS, this->name, this->IP_ADDRESS);
         }   
 
         void setIP(uint32_t ip) {
@@ -34,6 +36,8 @@ class EndDevice : public Device {
             std::uniform_int_distribution<uint32_t> dist(0, UINT32_MAX);
 
             this->IP_ADDRESS = dist(gen);
+
+            printf("[%u] %s IP: %s \n", this->MAC_ADDRESS, this->name, utils::pp_ip(this->IP_ADDRESS).c_str());
         }
 
         uint32_t getIP() {
@@ -58,7 +62,8 @@ class EndDevice : public Device {
             this->arp_table.insert(std::make_pair(target_ip, target_mac));
         }
 
-        // :(
+        // that's actually not that bad because 
+        // the number of cables is never going to be too large
         int findCableMac(uint32_t mac) {
             for(int i = 0; i < this->cables.size(); i++) {
                 if(this->cables[i]->conn->MAC_ADDRESS == mac) return i;
@@ -69,38 +74,39 @@ class EndDevice : public Device {
         void receiveArp(Arp a) override {
             printf("[%u] WHO HAS THE MAC OF %u? SAYS %u\n", this->MAC_ADDRESS, a.target_ip, a.sender_mac);
 
-            // check if the package is to ourselfs
-            if(a.target_ip == this->IP_ADDRESS && a.request) {
-                Arp response(this->MAC_ADDRESS, this->IP_ADDRESS, this->MAC_ADDRESS, a.sender_ip);
+            if(a.request) {
+                // send ARP to the one who sended the package
+                Arp response(this->MAC_ADDRESS, this->IP_ADDRESS, a.sender_mac, a.sender_ip);
                 int position = findCableMac(a.SRC_MAC);
 
                 response.request = false;
                 response.set_dst_mac(a.sender_mac);
                 response.set_src_mac(this->MAC_ADDRESS); 
                 this->cables[position]->sendArp(response);
-
+                return;
             }
-
+            this->set_arp(a.sender_ip, a.sender_mac);
         }
         
         void ping(uint32_t target_ip) {
+            printf("[%s] WANTS TO PING %s\n", utils::pp_ip(this->IP_ADDRESS).c_str(), utils::pp_ip(target_ip).c_str()); 
             // Check arp table
             if(!this->arp_lookup(target_ip)) {
-                // send arp request
+                // prepare arp request
                 Arp a(this->MAC_ADDRESS, this->IP_ADDRESS, 0xffff, target_ip);
+                a.set_src_mac(this->MAC_ADDRESS);
 
-                // send arp to all conected cables
+                // send arp to all conected cables (broadcast)
                 for(Cable *c : this->cables) {
                     c->sendArp(a);
                 }
             }
+            // right now we already have the MAC AND IP of the 
+            // device we want to ping
 
-
-            // receive arp response
             // send icmp request
             // receive icmp resposne
 
-            printf("[IP: %u] WANTS TO PING %u\n", this->IP_ADDRESS, target_ip);
         }
 };
 

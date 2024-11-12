@@ -11,10 +11,14 @@ extern "C" {
 
 class Device;
 
+// not a huge fan of this cable interface
+// like, this can simplify the way to send the packages
+// but things get very messy when things neeed to be accessed by outsiders
 class Cable {
     public:
         Device* conn;
 
+        uint32_t connMac();
 
         void setConn(Device *n);
 
