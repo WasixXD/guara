@@ -37,7 +37,7 @@ class EndDevice : public Device {
 
             this->IP_ADDRESS = dist(gen);
 
-            printf("[%u] %s IP: %s \n", this->MAC_ADDRESS, this->name, utils::pp_ip(this->IP_ADDRESS).c_str());
+            printf("[%s] %s IP: %s \n", utils::pp_mac(this->MAC_ADDRESS).c_str(), this->name, utils::pp_ip(this->IP_ADDRESS).c_str());
         }
 
         uint32_t getIP() {
@@ -58,6 +58,10 @@ class EndDevice : public Device {
             return this->arp_table.contains(target_ip);
         }
 
+        uint32_t get_mac(uint32_t target_ip) {
+            return this->arp_table.at(target_ip);
+        }
+
         void set_arp(uint32_t target_ip, uint32_t target_mac) {
             this->arp_table.insert(std::make_pair(target_ip, target_mac));
         }
@@ -72,7 +76,7 @@ class EndDevice : public Device {
         }
 
         void receiveArp(Arp a) override {
-            printf("[%u] WHO HAS THE MAC OF %u? SAYS %u\n", this->MAC_ADDRESS, a.target_ip, a.sender_mac);
+         
 
             if(a.request) {
                 // send ARP to the one who sended the package
@@ -87,6 +91,10 @@ class EndDevice : public Device {
             }
             this->set_arp(a.sender_ip, a.sender_mac);
         }
+
+        void receiveICMP(ICMP i) override {
+            printf("[%s] hey someone pinged me\n", utils::pp_mac(this->MAC_ADDRESS).c_str());
+        }
         
         void ping(uint32_t target_ip) {
             printf("[%s] WANTS TO PING %s\n", utils::pp_ip(this->IP_ADDRESS).c_str(), utils::pp_ip(target_ip).c_str()); 
@@ -97,12 +105,20 @@ class EndDevice : public Device {
                 a.set_src_mac(this->MAC_ADDRESS);
 
                 // send arp to all conected cables (broadcast)
+                // PCs usually just have one connection
                 for(Cable *c : this->cables) {
                     c->sendArp(a);
                 }
             }
             // right now we already have the MAC AND IP of the 
             // device we want to ping
+
+            // prepare icmp request
+            uint32_t target_mac = this->get_mac(target_ip);
+            ICMP packet(target_mac, this->MAC_ADDRESS);
+
+            Cable *c = this->cables[0];
+            c->sendICMP(packet);
 
             // send icmp request
             // receive icmp resposne

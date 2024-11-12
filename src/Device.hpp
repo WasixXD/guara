@@ -31,6 +31,7 @@ class Device {
         }
 
         virtual void receiveArp(Arp a) {};
+        virtual void receiveICMP(ICMP i) {};
 
 };
 

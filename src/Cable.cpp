@@ -20,3 +20,7 @@ void Cable::setConn(Device *d) {
 void Cable::sendArp(Arp a) {
     this->conn->receiveArp(a);
 }
+
+void Cable::sendICMP(ICMP i) {
+    this->conn->receiveICMP(i);
+}

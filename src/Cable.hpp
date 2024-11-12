@@ -25,6 +25,8 @@ class Cable {
         void draw(Vector2 to); 
 
         void sendArp(Arp a);
+
+        void sendICMP(ICMP i);
 };
 
 

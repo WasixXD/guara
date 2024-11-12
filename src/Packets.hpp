@@ -39,6 +39,19 @@ class Arp : public EthernetFrame {
             this->request = true;
         }
 };
+// https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Header
+class ICMP : public EthernetFrame {
+    public: 
+
+        uint8_t type;
+        uint8_t code;
+        uint16_t checksum;
+
+        bool request;
+
+        ICMP(uint32_t dst, uint32_t src) : EthernetFrame(dst, src) {}
+
+};
 
 
 #endif
