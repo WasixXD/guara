@@ -78,6 +78,7 @@ public:
 
     void receiveICMP(ICMP i) override {
         int mac_position = this->get_mac_pos(i.SRC_MAC);
+        i.pby++;
         this->cables[mac_position]->sendICMP(i);
     }
 };

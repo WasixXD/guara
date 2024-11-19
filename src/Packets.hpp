@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <inttypes.h>
+#include <chrono>
+#include <cstdio>
 
 class EthernetFrame {
 
@@ -46,8 +48,8 @@ class ICMP : public EthernetFrame {
         uint8_t type;
         uint8_t code;
         uint16_t checksum;
-
-        bool request;
+        std::chrono::time_point<std::chrono::system_clock> timestamp;
+        int pby = 0;
 
         ICMP(uint32_t dst, uint32_t src) : EthernetFrame(dst, src) {}
 

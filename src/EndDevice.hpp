@@ -11,6 +11,8 @@
 #include <vector>
 #include <random>
 #include <unordered_map>
+#include <chrono>
+#include <cstdio>
 
 
 class EndDevice : public Device {
@@ -97,7 +99,25 @@ class EndDevice : public Device {
         }
 
         void receiveICMP(ICMP i) override {
-            printf("[%s] hey someone pinged me\n", utils::pp_mac(this->MAC_ADDRESS).c_str());
+            // request
+            // just send a response
+            if(i.type == 8 && i.code == 0) {
+                ICMP packet(i.SRC_MAC, this->MAC_ADDRESS);
+
+                packet.pby++;
+                packet.type = 0;
+                packet.code = 0;
+                
+                this->cables[0]->sendICMP(packet);
+            }
+
+            // response
+            // the packet is back
+            if(i.type == 0 && i.code == 0) {
+                auto now = std::chrono::system_clock::now();
+                auto latency = std::chrono::duration_cast<std::chrono::milliseconds>(now - i.timestamp).count();
+                printf("[%s] RECEIVED ECHO REPLY :LATENCY=%ldms HOPS=%d\n", utils::pp_mac(this->MAC_ADDRESS).c_str(), latency, i.pby);
+            }
         }
         
         void ping(uint32_t target_ip) {
@@ -121,12 +141,16 @@ class EndDevice : public Device {
             uint32_t target_mac = this->get_mac(target_ip);
             ICMP packet(target_mac, this->MAC_ADDRESS);
 
-            Cable *c = this->cables[0];
-            c->sendICMP(packet);
+            packet.type = 8;
+            packet.code = 0;
+            packet.checksum = sizeof(packet);
+            packet.timestamp = std::chrono::system_clock::now();
 
             // send icmp request
-            // receive icmp resposne
-
+            Cable *c = this->cables[0];
+            for(int i = 0; i < 4; i++) {
+                c->sendICMP(packet);
+            }
         }
 };
 
