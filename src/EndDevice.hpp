@@ -59,7 +59,11 @@ class EndDevice : public Device {
         }
 
         uint32_t get_mac(uint32_t target_ip) {
-            return this->arp_table.at(target_ip);
+            auto it = this->arp_table.find(target_ip);
+            if (it != this->arp_table.end()) {
+                return it->second;
+            }
+            return -1;
         }
 
         void set_arp(uint32_t target_ip, uint32_t target_mac) {
@@ -77,6 +81,7 @@ class EndDevice : public Device {
 
         void receiveArp(Arp a) override {
          
+            if(!this->arp_lookup(a.target_ip)) this->set_arp(a.sender_ip, a.sender_mac);
 
             if(a.request) {
                 // send ARP to the one who sended the package
@@ -89,7 +94,6 @@ class EndDevice : public Device {
                 this->cables[position]->sendArp(response);
                 return;
             }
-            this->set_arp(a.sender_ip, a.sender_mac);
         }
 
         void receiveICMP(ICMP i) override {
@@ -106,7 +110,7 @@ class EndDevice : public Device {
 
                 // send arp to all conected cables (broadcast)
                 // PCs usually just have one connection
-                for(Cable *c : this->cables) {
+                for(Cable *c : this->cables) { 
                     c->sendArp(a);
                 }
             }

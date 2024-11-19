@@ -63,7 +63,7 @@ class Game {
 
         void addMiddleDevice() {
             Vector2 mousePos = GetMousePosition();
-            MiddleDevice *tmp = new MiddleDevice("Switch", mousePos.x, mousePos.y, 0xACAD, BLUE);
+            MiddleDevice *tmp = new MiddleDevice("Switch", mousePos.x, mousePos.y, 0xACA + this->devices.size(), BLUE);
             this->devices.push_back(tmp);
         }
 

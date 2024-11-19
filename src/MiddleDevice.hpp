@@ -7,6 +7,7 @@
 #include "utils.hpp"
 
 #include <unordered_map>
+#include <assert.h>
 
 class MiddleDevice : public Device
 {
@@ -33,7 +34,11 @@ public:
     }
 
     int get_mac_pos(uint32_t target_mac) {
-        return this->mac_table.at(target_mac);
+        try {
+            return this->mac_table.at(target_mac);
+        } catch(const std::out_of_range &e) {
+            return -1;
+        }
     }
 
     // don't like this
@@ -47,35 +52,32 @@ public:
 
     // i do think in the future i could just create a 
     // `receivePacket` that receives the BaseClass and then try to
-    // cast to another Class and then handle that way
+    // cast to another Class and then handle that way.
     // could be a more elegant solution 
     void receiveArp(Arp a) override {
-        if(!this->mac_lookup(a.sender_mac)) {
-            this->set_mac(a.sender_mac);
-        }
+        if(!this->mac_lookup(a.SRC_MAC)) this->set_mac(a.SRC_MAC); 
 
         // broadcast
-        if(a.target_mac == 0xffff) {
+        if(a.request) {
 
             printf("[%s] WHO HAS THE MAC OF %s? SAYS %s\n", utils::pp_mac(this->MAC_ADDRESS).c_str(), utils::pp_ip(a.target_ip).c_str(), utils::pp_mac(a.sender_mac).c_str());
+            uint32_t mac_copy = a.SRC_MAC;
+            a.set_src_mac(this->MAC_ADDRESS);
             for(Cable *c : this->cables) {
-                a.set_src_mac(this->MAC_ADDRESS);
                 // dont send the package to the sender
-                if(c->conn->MAC_ADDRESS != a.sender_mac) c->sendArp(a);
+                if(c->conn->MAC_ADDRESS != mac_copy) c->sendArp(a);
             }
             return;
         }
-
         // unicast
-        int mac_position = this->get_mac_pos(a.target_mac);
+        int mac_position = this->get_mac_pos(a.SRC_MAC);
+        a.set_src_mac(this->MAC_ADDRESS);
+        assert(mac_position >= 0);
         this->cables[mac_position]->sendArp(a);
     }
 
     void receiveICMP(ICMP i) override {
-        // what if we dont find it in the mac table
-        // what if we send it to another switch
-
-        int mac_position = this->get_mac_pos(i.DST_MAC);
+        int mac_position = this->get_mac_pos(i.SRC_MAC);
         this->cables[mac_position]->sendICMP(i);
     }
 };
