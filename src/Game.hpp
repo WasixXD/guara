@@ -1,7 +1,6 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
-#include <stdio.h>
 #include "EndDevice.hpp"
 #include "MiddleDevice.hpp"
 #include "Cable.hpp"

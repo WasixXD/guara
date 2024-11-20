@@ -7,7 +7,6 @@
 #include "utils.hpp"
 
 #include <stdio.h>
-#include <iostream>
 #include <vector>
 #include <random>
 #include <unordered_map>
