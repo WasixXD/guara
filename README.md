@@ -1,4 +1,4 @@
-# Guará - Simulador de Redes
+# Guará - Network Simulator
+![guara](https://github.com/user-attachments/assets/bfa6a58c-5d4f-406e-86ec-ef20dd3a68d2)
 
-## Por quê
-Professores que gostariam de dar aulas de rede deveriam ter um material em português e fácil de usar para demonstração em classe
+Can do ARP requests and send ICMP packets
